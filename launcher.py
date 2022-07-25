@@ -1,14 +1,14 @@
 import pandas as pd
-from pv_dim.clases.pv import PVProduction
-from pv_dim.clases.battery import BatterySizing
+from src.pv import PVProduction
+from src.battery import BatterySizing
 from utils.constants import fresnel_fixed
 from utils.pv_utils import init_inv
 
 # Leemos los datos de la carga del lugar de estudio y
 # los datos de irradiancia, temperatura, viento para la localidad escogida.
 
-ll = pd.read_csv('pv_dim/data/lalaguna.csv', header=6, skipfooter=12, engine='python', index_col='time')
-load = pd.read_csv('pv_dim/data/load.csv', sep=';', decimal=',')
+ll = pd.read_csv('data/lalaguna.csv', header=6, skipfooter=12, engine='python', index_col='time')
+load = pd.read_csv('data/load.csv', sep=';', decimal=',')
 
 if __name__ == '__main__':
 
