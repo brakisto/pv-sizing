@@ -14,6 +14,7 @@ warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 
 
 def _correct_load_data(load):
+
     # Corregimos los datos
     load = remove25hformat(load)
     load = from24to00(load)
