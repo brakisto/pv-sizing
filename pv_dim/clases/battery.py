@@ -1,5 +1,5 @@
 from math import ceil
-from pv import PVProduction
+from pv_dim.clases.pv import PVProduction
 
 class BatterySizing(PVProduction):
 
@@ -7,7 +7,6 @@ class BatterySizing(PVProduction):
                  inversor_eff, batt_volt, days_auto, dod, amp_hour_rating, nominal_voltage,
                  amb_temp_multiplier):
         """
-
         Args:
             load: pd.DataFrame
                 Datos horarios de carga obtenido de https://www.edistribucion.com/

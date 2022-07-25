@@ -1,4 +1,6 @@
 from pvlib import location, irradiance
+import pandas as pd
+
 
 def get_irradiance(lat, lon, start_date, end_date, tilt, surface_azimuth, freq='1H'):
     # Create location object to store lat, lon, timezone

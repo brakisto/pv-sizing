@@ -11,8 +11,9 @@ ll = pd.read_csv('pv_dim/data/lalaguna.csv', header=6, skipfooter=12, engine='py
 load = pd.read_csv('pv_dim/data/load.csv', sep=';', decimal=',')
 
 if __name__ == '__main__':
+
     days_auto = 0.5
-    num_panel = np
+    num_panel = 5
     price_panel = 260
     price_inverter = 1300
     add_cost = 500
