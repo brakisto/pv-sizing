@@ -31,7 +31,6 @@ def _correct_irr_data(irr):
 
 
 class PVProduction:
-
     def __init__(self, load, irr_data, fresnel_eff, tnoct, gamma, panel_power, num_panel,
                  lat=None, lon=None, start_date=None, end_date=None, tilt=None,
                  surface_azimuth=None, freq='1H'):
@@ -55,6 +54,10 @@ class PVProduction:
 
         """
 
+        if irr_data is None:
+            self.irr_data = get_irradiance(lat, lon, start_date, end_date, tilt, surface_azimuth, freq)
+            raise ValueError('Se necesita API para datos de temperatura horaria')
+
         self.load = _correct_load_data(load)
         self.irr_data = _correct_irr_data(irr_data)
         self.fresnel_eff = fresnel_eff
@@ -63,8 +66,6 @@ class PVProduction:
         self.panel_power = panel_power
         self.num_panels = num_panel
 
-        if irr_data is None:
-            self.irr_data = get_irradiance(lat, lon, start_date, end_date, tilt, surface_azimuth, freq)
 
     def mean_hourly_load_data(self):
         """

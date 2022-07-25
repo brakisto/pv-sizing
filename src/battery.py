@@ -5,7 +5,7 @@ class BatterySizing(PVProduction):
 
     def __init__(self, load, irr_data, fresnel_eff, tnoct, gamma, panel_power, num_panel,
                  inversor_eff, batt_volt, days_auto, dod, amp_hour_rating, nominal_voltage,
-                 amb_temp_multiplier):
+                 amb_temp_multiplier, **kwargs):
         """
         Args:
             load: pd.DataFrame
@@ -41,7 +41,9 @@ class BatterySizing(PVProduction):
                 Voltaje [V] de una batería.
         """
         super().__init__(load=load, irr_data=irr_data, fresnel_eff=fresnel_eff, tnoct=tnoct, gamma=gamma,
-                         panel_power=panel_power, num_panel=num_panel)
+                         panel_power=panel_power, num_panel=num_panel,
+                         lat=None, lon=None, start_date=None, end_date=None, tilt=None,
+                         surface_azimuth=None, freq='1H')
 
         self.inversor_eff = inversor_eff
         self.batt_volt = batt_volt
