@@ -13,6 +13,22 @@ from pandas.core.common import SettingWithCopyWarning
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 
 
+def _correct_load_data(load):
+    # Corregimos los datos
+    load = remove25hformat(load)
+    load = from24to00(load)
+    load.set_index('time', inplace=True)
+    return load
+
+
+def _correct_irr_data(irr):
+    # Pasamos los datos de fecha a format datetime.
+    irr.index = pd.to_datetime(irr.index, format='%Y%m%d:%H%M', errors='coerce')
+    # Quitamos 29 de Febrero si existe por comodidad
+    irr = remove_leap_day(irr)
+    return irr
+
+
 class PVProduction:
 
     def __init__(self, load, irr_data, fresnel_eff, tnoct, gamma, panel_power, num_panel,
@@ -38,8 +54,8 @@ class PVProduction:
 
         """
 
-        self.load = self._correct_load_data(load)
-        self.irr_data = self._correct_irr_data(irr_data)
+        self.load = _correct_load_data(load)
+        self.irr_data = _correct_irr_data(irr_data)
         self.fresnel_eff = fresnel_eff
         self.tnoct = tnoct
         self.gamma = gamma
@@ -48,20 +64,6 @@ class PVProduction:
 
         if irr_data is None:
             self.irr_data = get_irradiance(lat, lon, start_date, end_date, tilt, surface_azimuth, freq)
-
-    def _correct_load_data(self, load):
-        # Corregimos los datos
-        load = remove25hformat(load)
-        load = from24to00(load)
-        load.set_index('time', inplace=True)
-        return load
-
-    def _correct_irr_data(self, irr):
-        # Pasamos los datos de fecha a format datetime.
-        irr.index = pd.to_datetime(irr.index, format='%Y%m%d:%H%M', errors='coerce')
-        # Quitamos 29 de Febrero si existe por comodidad
-        irr = remove_leap_day(irr)
-        return irr
 
     def mean_hourly_load_data(self):
         """
@@ -252,5 +254,3 @@ class PVProduction:
         myload.AE_kWh.plot(ax=ax[0])
         myirr.kWh.plot(ax=ax[0])
         plt.show()
-
-
