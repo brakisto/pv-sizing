@@ -1,5 +1,19 @@
 import pandas as pd
 
+def european_efficiency_inverter(eta5, eta10, eta20, eta30, eta50, eta100):
+    """
+    Función para el cáculo de la Eficiencia Europea de un inversor.
+    La Eficiencia Europea es una eficiencia de operación promedio
+    sobre una distribución de energía anual correspondiente al clima
+    de Europa Media y ahora se hace referencia en casi cualquier hoja de datos del inversor.
+
+    El valor de esta eficiencia ponderada se obtiene asignando un porcentaje de tiempo a
+    los residuos del inversor en un rango de funcionamiento dado.
+
+    Suele venir en la hoja técnica del inversor.
+    """
+    return 0.03 * eta5 + 0.06 * eta10 + 0.13 * eta20 + 0.1 * eta30 + 0.48 * eta50 + 0.2 * eta100
+
 def index_tuple_to_datetime(df):
     a = pd.DataFrame(df.index.values.tolist(), columns=['month', 'day', 'hour'])
     df['time'] = pd.to_datetime(a, format='%m%d%H')

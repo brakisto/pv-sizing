@@ -1,56 +1,16 @@
 import matplotlib.pyplot as plt
-from pvlib import location, irradiance
-from math import ceil
+
 import numpy as np
 import numpy_financial as npf
 from itertools import accumulate
 
-from PV.utils.pv_utils import *
+from utils.pv_utils import *
+from utils.irradiance import get_irradiance
 
 import warnings
 from pandas.core.common import SettingWithCopyWarning
 
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
-
-
-def european_efficiency_inverter(eta5, eta10, eta20, eta30, eta50, eta100):
-    """
-    Función para el cáculo de la Eficiencia Europea de un inversor.
-    La Eficiencia Europea es una eficiencia de operación promedio
-    sobre una distribución de energía anual correspondiente al clima
-    de Europa Media y ahora se hace referencia en casi cualquier hoja de datos del inversor.
-
-    El valor de esta eficiencia ponderada se obtiene asignando un porcentaje de tiempo a
-    los residuos del inversor en un rango de funcionamiento dado.
-
-    Suele venir en la hoja técnica del inversor.
-    """
-    return 0.03 * eta5 + 0.06 * eta10 + 0.13 * eta20 + 0.1 * eta30 + 0.48 * eta50 + 0.2 * eta100
-
-
-def get_irradiance(lat, lon, start_date, end_date, tilt, surface_azimuth, freq='1H'):
-    # Create location object to store lat, lon, timezone
-    site_location = location.Location(lat, lon)
-    # Creates one day's worth of 1 hour intervals
-    times = pd.date_range(start=start_date, end=end_date, freq=freq)
-    # Generate clearsky data using the Ineichen model, which is the default
-    # The get_clearsky method returns a dataframe with values for GHI, DNI,
-    # and DHI
-    clearsky = site_location.get_clearsky(times)
-    # Get solar azimuth and zenith to pass to the transposition function
-    solar_position = site_location.get_solarposition(times=times)
-    # Use the get_total_irradiance function to transpose the GHI to POA
-    POA_irradiance = irradiance.get_total_irradiance(
-        surface_tilt=tilt,
-        surface_azimuth=surface_azimuth,
-        dni=clearsky['dni'],
-        ghi=clearsky['ghi'],
-        dhi=clearsky['dhi'],
-        solar_zenith=solar_position['apparent_zenith'],
-        solar_azimuth=solar_position['azimuth'])
-    # Return DataFrame with only GHI and POA
-    return pd.DataFrame({'GHI': clearsky['ghi'],
-                         'POA': POA_irradiance['poa_global']})
 
 
 class PVProduction:
@@ -294,77 +254,3 @@ class PVProduction:
         plt.show()
 
 
-
-class BatterySizing(PVProduction):
-
-    def __init__(self, load, irr_data, fresnel_eff, tnoct, gamma, panel_power, num_panel,
-                 inversor_eff, batt_volt, days_auto, dod, amp_hour_rating, nominal_voltage,
-                 amb_temp_multiplier):
-        """
-
-        Args:
-            load: pd.DataFrame
-                Datos horarios de carga obtenido de https://www.edistribucion.com/
-            irr_data: pd.DataFrame
-                Irradiancias (directa, difusa y reflejada) sobre el plano inclinado, temperatura
-                media, velcodidad del viento horarios obtenido a partir de https://re.jrc.ec.europa.eu/pvg_tools/en/
-            tnoct: int
-                "Nominal operating cell temperature" facilitada por el fabricante
-            gamma: float
-                Coeficiente de pérdidas facilitado por el fabricante
-            panel_power: int
-                Potencia pico del panel fotovoltaico
-            num_panel: int
-                Número de paneles fotovoltaicos
-            fresnel_eff: array_like
-                Eficiencia fresnel por cada mes
-            inversor_eff: float
-                Eficiencia del inversor obtenida de la hoja técnica.
-            batt_volt: int
-                Voltaje del banco de baterías.
-            amb_temp_multiplier: float
-                Multiplicador de temperatura dependiente de la temperatura mínima en invierno.
-            days_auto: float
-                Días de autonomía.
-            dod: float
-                dod de la batería obtenida de la hoja ténica.
-            amp_hour_rating: float
-                Amp-hour rating obtenido de la hoja ténica.
-            nominal_voltage: int
-                Voltaje [V] nominal del sistema.
-            batt_volt: int
-                Voltaje [V] de una batería.
-        """
-        super().__init__(load=load, irr_data=irr_data, fresnel_eff=fresnel_eff, tnoct=tnoct, gamma=gamma,
-                         panel_power=panel_power, num_panel=num_panel)
-
-        self.inversor_eff = inversor_eff
-        self.batt_volt = batt_volt
-        self.days_auto = days_auto
-        self.dod = dod
-        self.amp_hour_rating = amp_hour_rating
-        self.nominal_voltage = nominal_voltage
-        self.amb_temp_multiplier = amb_temp_multiplier
-
-    def daily_ah(self):
-        """
-
-        Returns: float
-            Amperios-hora diarios [Ah]
-
-        """
-        daily_energy = self.mean_hourly_load_data().AE_kWh.sum() * 1000  # Pasamos a Wh
-        return (daily_energy / self.inversor_eff) / self.batt_volt
-
-    def battery_sizing(self):
-        """
-
-        Returns: tuple
-            Capcaidad total de baterías, número de baterías en paralelo, número de baterías en serie
-
-        """
-        daily_ah = self.daily_ah() * self.amb_temp_multiplier
-        total_battery_capacity = (daily_ah * self.days_auto) / self.dod
-        n_bat_paralell = ceil(total_battery_capacity / self.amp_hour_rating)
-        n_bat_series = ceil(self.nominal_voltage / self.batt_volt)
-        return total_battery_capacity, n_bat_paralell, n_bat_series
