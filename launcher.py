@@ -42,7 +42,7 @@ if __name__ == '__main__':
     print(f'Capacidad necesaria para {days_auto} días de autonomía: {total_battery_capacity} [Ah]')
 
     print(f'Coste energía sin PV: {coste_energia_actual} €/año')
-    print(f'Coste energía con PV: {coste_energia_pv} €/año')
+    print(f'Coste energía con PV: {coste_energia_pv} €`/año')
     print(f'Compensación PV: {compensacion_pv} €/año')
     print(f'Ahorro: {ahorro} €/año')
 

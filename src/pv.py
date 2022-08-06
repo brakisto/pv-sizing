@@ -235,7 +235,7 @@ class PVProduction:
             raise ValueError('No se ha añadido esta opción.')
 
         df_cf = pd.DataFrame(
-            {'Inversión inicial': initial_inversion, 'OyM': duration_project_oym, 'Ahorro': ahorro, 'Cashflow': cf,
+            {'Inversión inicial': initial_inversion, 'OyM': duration_project_oym, 'Ahorro': duration_project_ahorro, 'Cashflow': cf,
              'Cashflow acumulado': a_cf})
 
         return df_cf, npf.npv(discount_rate, cf), npf.irr(cf)
