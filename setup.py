@@ -42,12 +42,12 @@ In the image you can see a representation of the final result obtained. Also in 
 | 22  | 0.0000            | 110.233684 | 1249.855935 | 1139.622251  | 13689.750306       |
 | 23  | 0.0000            | 112.438358 | 1299.850172 | 1187.411814  | 14877.162120       |
 | 24  | 0.0000            | 114.687125 | 1351.844179 | 1237.157054  | 16114.319174       |
-
+clear
 ![](https://github.com/brakisto/PV-sizing/raw/main/src/imgs/pvprod.png) 
 (1) PV production and load; (2) Cashflow """,
     long_description_content_type='text/markdown',
-    name='pv_sizing',
-    version='0.2.1',
+    name='pvandbat',
+    version='0.0.1',
     license='MIT',
     author="Kiril Ivanov Kurtev",
     author_email='brakisto2015@gmail.com',
