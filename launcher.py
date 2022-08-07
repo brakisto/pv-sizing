@@ -4,20 +4,24 @@ from src.battery import BatterySizing
 from utils.constants import fresnel_fixed
 from utils.pv_utils import init_inv
 
-# Leemos los datos de la carga del lugar de estudio y
-# los datos de irradiancia, temperatura, viento para la localidad escogida.
 
-irradiation = pd.read_csv('data/example_irr.csv', header=6, skipfooter=12, engine='python', index_col='time')
-load = pd.read_csv('data/load.csv', sep=';', decimal=',')
+def main():
+    # Leemos los datos de la carga del lugar de estudio y
+    # los datos de irradiancia, temperatura, viento para la localidad escogida.
+    irradiation = pd.read_csv('data/example_irr.csv', header=6, skipfooter=12, engine='python', index_col='time')
+    try:
+        load = pd.read_csv('data/load.csv', sep=';', decimal=',')
+        print(load.Hora)
+    except: 
+        load = pd.read_csv('data/load.csv', sep=',')
+    print(load)
+    days_auto = 0.5
+    num_panel = 5
+    price_panel = 260
+    price_inverter = 1300
+    add_cost = 500
+    coste_instalacion = 0.15
 
-days_auto = 0.5
-num_panel = 5
-price_panel = 260
-price_inverter = 1300
-add_cost = 500
-coste_instalacion = 0.15
-
-if __name__ == '__main__':
 
     inversion_inicial = init_inv(num_panel=num_panel, price_panel=price_panel,
                                  costes_adicionales=add_cost, coste_instalacion=coste_instalacion,
@@ -52,3 +56,8 @@ if __name__ == '__main__':
     print()
     print(cashflow)
     pv.plot(cashflow['Cashflow acumulado'])
+
+if __name__ == '__main__':
+    main()
+
+
