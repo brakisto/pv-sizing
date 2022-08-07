@@ -255,4 +255,9 @@ class PVProduction:
         cashflow.plot.bar(ax=ax[1])
         myload.AE_kWh.plot(ax=ax[0])
         myirr.kWh.plot(ax=ax[0])
+
+        ax[0].set(title = "PV production and load", ylabel="Energy [kWh]", xlabel="Time [hours]")
+        ax[1].set(title = "Cashflow", xlabel="Time [years]", ylabel= "Money [€]")
+
+        plt.tight_layout()
         plt.show()
