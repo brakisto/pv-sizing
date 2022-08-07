@@ -1,5 +1,19 @@
 import pandas as pd
 
+def cell_temp(df_prod, irr_data, tnoct):
+    """_summary_
+
+    Args:
+        df_prod (_type_): _description_
+        irr_data (_type_): _description_
+        tnoct (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    # TEMPERATURA CÉLULA
+    df_prod['T_cell'] = irr_data['T2m'] + irr_data['Irr'] * (tnoct - 20) / 800
+    return df_prod
 
 def idae_pv_prod(df_prod, df_irr, panel_power, num_panels):
 

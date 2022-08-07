@@ -6,7 +6,7 @@ import numpy_financial as npf
 from itertools import accumulate
 
 from utils.pv_utils import performance_ratio, european_efficiency_inverter, index_tuple_to_datetime, oneyear_todatetimeindex, \
-                            remove_leap_day, remove25hformat, from24to00, idae_pv_prod
+                            remove_leap_day, remove25hformat, from24to00, idae_pv_prod, cell_temp
 from utils.irradiance import get_irradiance
 
 import warnings
@@ -154,9 +154,8 @@ class PVProduction:
         # CÁLCULO DE LA ENERGÍA PRODUCIDA
         # IRRADIANCIA SUMA DIRECTA, DIFUSA Y REFLEJADA
         self.irr_data['Irr'] = self.irr_data['Gb(i)'] + self.irr_data['Gd(i)'] + self.irr_data['Gr(i)']
-        # TEMPERATURA CÉLULA
-        df_prod['T_cell'] = self.irr_data['T2m'] + self.irr_data['Irr'] * (self.tnoct - 20) / 800
 
+        df_prod = cell_temp(df_prod, self.irr_data, self.tnoct)
         df_prod = performance_ratio(df_prod, self.gamma, df_prod.T_cell, self.fresnel_eff.mean())
         df_prod = idae_pv_prod(df_prod, self.irr_data, self.panel_power, self.num_panels)
 
