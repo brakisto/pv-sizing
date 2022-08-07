@@ -1,10 +1,12 @@
 import matplotlib.pyplot as plt
+import pandas as pd
 
 import numpy as np
 import numpy_financial as npf
 from itertools import accumulate
 
-from utils.pv_utils import *
+from utils.pv_utils import performance_ratio, european_efficiency_inverter, index_tuple_to_datetime, oneyear_todatetimeindex, \
+                            remove_leap_day, remove25hformat, from24to00, idae_pv_prod
 from utils.irradiance import get_irradiance
 
 import warnings
@@ -12,8 +14,15 @@ from pandas.core.common import SettingWithCopyWarning
 
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 
-
 def _correct_load_data(load):
+    """_summary_
+
+    Args:
+        load (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
 
     # Corregimos los datos
     load = remove25hformat(load)
@@ -23,6 +32,14 @@ def _correct_load_data(load):
 
 
 def _correct_irr_data(irr):
+    """_summary_
+
+    Args:
+        irr (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
     # Pasamos los datos de fecha a format datetime.
     irr.index = pd.to_datetime(irr.index, format='%Y%m%d:%H%M', errors='coerce')
     # Quitamos 29 de Febrero si existe por comodidad
@@ -31,6 +48,7 @@ def _correct_irr_data(irr):
 
 
 class PVProduction:
+
     def __init__(self, load, irr_data, fresnel_eff, tnoct, gamma, panel_power, num_panel,
                  lat=None, lon=None, start_date=None, end_date=None, tilt=None,
                  surface_azimuth=None, freq='1H'):
@@ -60,21 +78,14 @@ class PVProduction:
 
         self.load = _correct_load_data(load)
         self.irr_data = _correct_irr_data(irr_data)
+        
         self.fresnel_eff = fresnel_eff
         self.tnoct = tnoct
         self.gamma = gamma
         self.panel_power = panel_power
         self.num_panels = num_panel
 
-
-    def mean_hourly_load_data(self):
-        """
-        Función para calcular la media horaria de la carga.
-
-        Returns: pd.DataFrame con la media horaria de la carga
-
-        """
-        return self.load.groupby([self.load.Hora]).mean()
+        self.prod_data = self.pv_production()
 
     def mean_yearly_load_data(self):
         """
@@ -95,6 +106,25 @@ class PVProduction:
 
         return oneyear_todatetimeindex(self.irr_data.groupby(
             [self.irr_data.index.month, self.irr_data.index.day, self.irr_data.index.hour]).mean())
+    
+    def mean_yearly_prod_data(self):
+        """
+        Función para calcular la media anual de la producción.
+
+        Returns: pd.DataFrame con la media anual de la producción
+        """
+
+        return oneyear_todatetimeindex(self.prod_data.groupby(
+            [self.prod_data.index.month, self.prod_data.index.day, self.prod_data.index.hour]).mean())
+    
+    def mean_hourly_load_data(self):
+        """
+        Función para calcular la media horaria de la carga.
+
+        Returns: pd.DataFrame con la media horaria de la carga
+
+        """
+        return self.load.groupby([self.load.Hora]).mean()
 
     def mean_hourly_irr_data(self):
         """
@@ -104,37 +134,33 @@ class PVProduction:
         """
         return self.irr_data.groupby([self.irr_data.index.hour]).mean()
 
+    def mean_hourly_irr_data(self):
+        """
+        Función para calcular la media horaria de la producción.
+
+        Returns: pd.DataFrame con la media horaria de la producción
+        """
+        return self.prod_data.groupby([self.prod_data.index.hour]).mean()
+
     def pv_production(self):
         """
         Función para añadir al Data Frame de irradiancia el Performance Ratio de la instalción y la producción de
         energía para cada time step.
 
         """
+
+        df_prod = pd.DataFrame(index = self.irr_data.index)
+
         # CÁLCULO DE LA ENERGÍA PRODUCIDA
         # IRRADIANCIA SUMA DIRECTA, DIFUSA Y REFLEJADA
         self.irr_data['Irr'] = self.irr_data['Gb(i)'] + self.irr_data['Gd(i)'] + self.irr_data['Gr(i)']
         # TEMPERATURA CÉLULA
-        self.irr_data['T_cell'] = self.irr_data['T2m'] + self.irr_data['Irr'] * (self.tnoct - 20) / 800
-        # PERFORMANCE RATIO
-        self.irr_data['PRtemp'] = (1 + self.gamma * (self.irr_data['T_cell'] - 25) / 100)
+        df_prod['T_cell'] = self.irr_data['T2m'] + self.irr_data['Irr'] * (self.tnoct - 20) / 800
 
-        # OBTENIDO A PARTIR DE LA FUNCIÓN PARA LA EFICIENCIA EUROPEA
-        self.irr_data['PRfres'] = self.fresnel_eff.mean()
-        # CAIDA DE TENSIÓN DE 0,8% PARA CC
-        self.irr_data['PRCC'] = 0.992
-        self.irr_data['PRdisp'] = 1
-        self.irr_data['PRCC/CA'] = european_efficiency_inverter(eta5=60, eta10=80, eta20=89, eta30=91, eta50=92,
-                                                                eta100=93) / 100
-        # CAIDA DEL 1,5% PARTE AC
-        self.irr_data['PRAC'] = 0.985
-        self.irr_data['PR'] = self.irr_data['PRtemp'] * self.irr_data['PRfres'] * self.irr_data['PRdisp'] * \
-                              self.irr_data['PRCC'] * self.irr_data['PRCC/CA'] * self.irr_data['PRAC']
-        # PRODUCCION
-        self.irr_data['Wh'] = self.irr_data['PR'] * self.irr_data['Irr'] * self.panel_power * self.num_panels / 1000
-        self.irr_data['kWh'] = self.irr_data.Wh / 1e3
-        self.irr_data['MWh'] = self.irr_data.Wh / 1e6
+        df_prod = performance_ratio(df_prod, self.gamma, df_prod.T_cell, self.fresnel_eff.mean())
+        df_prod = idae_pv_prod(df_prod, self.irr_data, self.panel_power, self.num_panels)
 
-        print('Potencia pico: {} Wp'.format(self.panel_power * self.num_panels))
+        return df_prod
 
     def _yearly_load_and_irr_to_datetime_index(self):
         """
@@ -148,7 +174,9 @@ class PVProduction:
             pd.date_range('2019-01-01', '2020-01-01', freq='H', inclusive='left'))
         myirr = self.mean_yearly_irr_data().set_index(
             pd.date_range('2019-01-01', '2020-01-01', freq='H', inclusive='left'))
-        return myload, myirr
+        myprod = self.mean_yearly_prod_data().set_index(
+            pd.date_range('2019-01-01', '2020-01-01', freq='H', inclusive='left'))
+        return myload, myirr, myprod
 
     def energy_balance(self):
         """
@@ -158,10 +186,10 @@ class PVProduction:
             Tupla con el balance energético, energía comprada y energía vertida.
 
         """
-        self.pv_production()
+        df_prod = self.pv_production()
 
-        myload, myirr = self._yearly_load_and_irr_to_datetime_index()
-        balance = myload.AE_kWh - myirr.kWh
+        myload, myirr, myprod = self._yearly_load_and_irr_to_datetime_index()
+        balance = myload.AE_kWh - myprod.kWh
 
         comprada = balance.loc[balance > 0]
         vertida = balance.loc[balance < 0]
@@ -249,12 +277,12 @@ class PVProduction:
 
         """
 
-        myload, myirr = self._yearly_load_and_irr_to_datetime_index()
+        myload, myirr, myprod = self._yearly_load_and_irr_to_datetime_index()
 
         fig, ax = plt.subplots(2)
         cashflow.plot.bar(ax=ax[1])
         myload.AE_kWh.plot(ax=ax[0])
-        myirr.kWh.plot(ax=ax[0])
+        myprod.kWh.plot(ax=ax[0])
 
         ax[0].set(title = "PV production and load", ylabel="Energy [kWh]", xlabel="Time [hours]")
         ax[1].set(title = "Cashflow", xlabel="Time [years]", ylabel= "Money [€]")

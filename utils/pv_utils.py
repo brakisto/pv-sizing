@@ -1,5 +1,56 @@
 import pandas as pd
 
+
+def idae_pv_prod(df_prod, df_irr, panel_power, num_panels):
+
+    """_summary_
+
+    Args:
+        df_prod (_type_): _description_
+        df_irr (_type_): _description_
+        panel_power (_type_): _description_
+        num_panels (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    # PRODUCCION
+    df_prod['Wh'] = df_prod['PR'] * df_irr['Irr'] * panel_power * num_panels / 1000 # E = GR [kW/m2] * PR * P [W] * num_panels / 1 kW/m2 /// Como son intervalos de 1 hora obtenemos Wh 
+    df_prod['kWh'] = df_prod.Wh / 1e3
+    df_prod['MWh'] = df_prod.Wh / 1e6
+    return df_prod
+
+def performance_ratio(df_prod_hourly, gamma, t_cell_hourly, mean_fresnel_eff):
+    """_summary_
+
+    Args:
+        df_prod_hourly (pd.DataFrame): _description_
+        gamma (float): _description_
+        t_cell_hourly (numpy.array or pd.Series or pd.DataFrame): _description_
+        mean_fresnel_eff (float): _description_
+
+    Returns:
+        pd.DataFrame: _description_
+    """
+    
+    # PERFORMANCE RATIO
+    df_prod_hourly['PRtemp'] = (1 + gamma * (t_cell_hourly - 25) / 100)
+
+    # OBTENIDO A PARTIR DE LA FUNCIÓN PARA LA EFICIENCIA EUROPEA
+    df_prod_hourly['PRfres'] = mean_fresnel_eff
+    # CAIDA DE TENSIÓN DE 0,8% PARA CC
+    df_prod_hourly['PRCC'] = 0.992
+    df_prod_hourly['PRdisp'] = 1
+    df_prod_hourly['PRCC/CA'] = european_efficiency_inverter(eta5=60, eta10=80, eta20=89, eta30=91, eta50=92,
+                                                            eta100=93) / 100
+    # CAIDA DEL 1,5% PARTE AC
+    df_prod_hourly['PRAC'] = 0.985
+    df_prod_hourly['PR'] = df_prod_hourly['PRtemp'] * df_prod_hourly['PRfres'] * df_prod_hourly['PRdisp'] * \
+                            df_prod_hourly['PRCC'] * df_prod_hourly['PRCC/CA'] * df_prod_hourly['PRAC']
+    
+    return df_prod_hourly
+
+
 def european_efficiency_inverter(eta5, eta10, eta20, eta30, eta50, eta100):
     """
     Función para el cáculo de la Eficiencia Europea de un inversor.
