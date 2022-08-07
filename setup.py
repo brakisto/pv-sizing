@@ -2,14 +2,10 @@ from setuptools import setup, find_packages
 
 setup(
     long_description="""
-# PV-sizing
-Photovoltaic sizing
+# Photovoltaic sizing
 
-This library allows the sizing of photovoltaic panels for any building and load curve provided. The photovoltaic producition was calculated using the "IDAE: Pliego de Condiciones Técnicas de Instalaciones Conectadas a Red" with the following equation:
-
-$$
-E_{\mathrm{p}}=\frac{G_{\mathrm{dm}}(\alpha, \beta) P_{\mathrm{mp}} P R}{G_{\mathrm{CEM}}}
-$$
+This library allows the sizing of photovoltaic panels for any building and load curve provided. The photovoltaic producition was calculated using the "IDAE: Pliego de Condiciones Técnicas de Instalaciones Conectadas a Red" from the following source:
+https://www.idae.es/sites/default/files/documentos_5654_FV_pliego_condiciones_tecnicas_instalaciones_conectadas_a_red_C20_Julio_2011_3498eaaf.pdf
 
  By simply entering the number of panels (and their parameters from the datasheet provided by the manufacturer), the hourly irradiance (from https://re.jrc.ec.europa.eu/pvg_tools/en/), and the hourlyload over a year it is possible to obtain the accumulated cahsflow and cashflow taking into account the infaltion over a period of 25 years (typical duration of a photovoltaic project). It is also necessary to provide the electricity purchase tariff, and also the price for compensation in case of grid feed-in.
 
@@ -51,14 +47,14 @@ In the image you can see a representation of the final result obtained. Also in 
 (1) PV production and load; (2) Cashflow """,
     long_description_content_type='text/markdown',
     name='pv_sizing',
-    version='0.1.1.1',
+    version='0.2.1',
     license='MIT',
     author="Kiril Ivanov Kurtev",
     author_email='brakisto2015@gmail.com',
     packages=find_packages('src'),
     package_dir={'': 'src'},
     url='https://github.com/brakisto/PV-sizing',
-    keywords='PV sizing',
+    keywords='photovoltaic sizing batteries financial analysis',
     install_requires=[
           'numpy',
           'numpy-financial',
