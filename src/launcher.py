@@ -1,6 +1,6 @@
 import pandas as pd
-from src.pv import PVProduction
-from src.battery import BatterySizing
+from classes.pv import PVProduction
+from classes.battery import BatterySizing
 from utils.constants import fresnel_fixed
 from utils.pv_utils import init_inv
 
