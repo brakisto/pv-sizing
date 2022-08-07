@@ -1,7 +1,13 @@
 # PV-sizing
 Photovoltaic sizing
 
-This library allows the sizing of photovoltaic panels for any building and load curve provided. By simply entering the number of panels (and their parameters from the datasheet provided by the manufacturer) it is possible to obtain the accumulated cahsflow and cashflow taking into account the infaltion over a period of 25 years (typical duration of a photovoltaic project). It is also necessary to provide the electricity purchase tariff, and also the price for compensation in case of grid feed-in.
+This library allows the sizing of photovoltaic panels for any building and load curve provided. The photovoltaic producition was calculated using the "IDAE: Pliego de Condiciones Técnicas de Instalaciones Conectadas a Red" with the following equation:
+
+$$
+E_{\mathrm{p}}=\frac{G_{\mathrm{dm}}(\alpha, \beta) P_{\mathrm{mp}} P R}{G_{\mathrm{CEM}}}
+$$
+
+ By simply entering the number of panels (and their parameters from the datasheet provided by the manufacturer), the hourly irradiance (from https://re.jrc.ec.europa.eu/pvg_tools/en/), and the hourlyload over a year it is possible to obtain the accumulated cahsflow and cashflow taking into account the infaltion over a period of 25 years (typical duration of a photovoltaic project). It is also necessary to provide the electricity purchase tariff, and also the price for compensation in case of grid feed-in.
 
 It also allows the sizing of the battery bank for N days of autonomy based on the daily energy consumed.
 
