@@ -6,10 +6,10 @@ setup(
 Photovoltaic sizing
 
 This library allows the sizing of photovoltaic panels for any building and load curve provided. The photovoltaic producition was calculated using the "IDAE: Pliego de Condiciones Técnicas de Instalaciones Conectadas a Red" with the following equation:
-<div>
-$
+
+$$
 E_{\mathrm{p}}=\frac{G_{\mathrm{dm}}(\alpha, \beta) P_{\mathrm{mp}} P R}{G_{\mathrm{CEM}}}
-$</div>
+$$
 
  By simply entering the number of panels (and their parameters from the datasheet provided by the manufacturer), the hourly irradiance (from https://re.jrc.ec.europa.eu/pvg_tools/en/), and the hourlyload over a year it is possible to obtain the accumulated cahsflow and cashflow taking into account the infaltion over a period of 25 years (typical duration of a photovoltaic project). It is also necessary to provide the electricity purchase tariff, and also the price for compensation in case of grid feed-in.
 
@@ -47,10 +47,11 @@ In the image you can see a representation of the final result obtained. Also in 
 | 23  | 0.0000            | 112.438358 | 1299.850172 | 1187.411814  | 14877.162120       |
 | 24  | 0.0000            | 114.687125 | 1351.844179 | 1237.157054  | 16114.319174       |
 
-""",
+![](https://github.com/brakisto/PV-sizing/raw/main/src/imgs/pvprod.png) 
+(1) PV production and load; (2) Cashflow """,
     long_description_content_type='text/markdown',
     name='pv_sizing',
-    version='0.1.1',
+    version='0.1.1.1',
     license='MIT',
     author="Kiril Ivanov Kurtev",
     author_email='brakisto2015@gmail.com',
