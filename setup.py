@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, setuptools
 
 setup(
     long_description="""
@@ -46,12 +46,12 @@ clear
 ![](https://github.com/brakisto/PV-sizing/raw/main/src/imgs/pvprod.png) 
 (1) PV production and load; (2) Cashflow """,
     long_description_content_type='text/markdown',
-    name='pvandbat',
-    version='0.0.1',
+    name='pv_sizing',
+    version='0.2.2',
     license='MIT',
     author="Kiril Ivanov Kurtev",
     author_email='brakisto2015@gmail.com',
-    packages=find_packages('src'),
+    packages=setuptools.find_packages(),
     package_dir={'': 'src'},
     url='https://github.com/brakisto/PV-sizing',
     keywords='photovoltaic sizing batteries financial analysis',
