@@ -15,6 +15,9 @@ The calculations for the initial investment have been calculated with typical ma
 
 In the image you can see a representation of the final result obtained. Also in the table below the cashflow over the liftime of the project is shown.
 
+
+<center>
+
 | Año | Inversión inicial | OyM        | Ahorro      | Cashflow     | Cashflow acumulado |
 |-----|-------------------|------------|-------------|--------------|--------------------|
 | 0   | 3565.1725         | 71.303450  | 527.383444  | -3109.092506 | -3109.092506       |
@@ -43,4 +46,8 @@ In the image you can see a representation of the final result obtained. Also in 
 | 23  | 0.0000            | 112.438358 | 1299.850172 | 1187.411814  | 14877.162120       |
 | 24  | 0.0000            | 114.687125 | 1351.844179 | 1237.157054  | 16114.319174       |
 
+</center>
+
+<center>
 ![alt text](src/imgs/pvprod.png?raw=true "(1) PV production and load; (2) Cashflow")
+</center>
