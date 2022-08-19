@@ -1,0 +1,8 @@
+numpy
+numpy-financial
+pandas
+pvlib
+
+[test]
+pytest
+coverage
