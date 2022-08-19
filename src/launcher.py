@@ -41,20 +41,7 @@ def main():
     coste_energia_actual, coste_energia_pv, compensacion_pv, ahorro = pv.savings_from_pv(sell_price=0.06,
                                                                                          buy_price=0.32)
     cashflow, van, tir = pv.economic_analysis(inversion_inicial)
-
-    print(f'Energía media diaria consumida: {daily_load_Wh} [Wh]')
-    print(f'Capacidad necesaria para {days_auto} días de autonomía: {total_battery_capacity} [Ah]')
-
-    print(f'Coste energía sin PV: {coste_energia_actual} €/año')
-    print(f'Coste energía con PV: {coste_energia_pv} €`/año')
-    print(f'Compensación PV: {compensacion_pv} €/año')
-    print(f'Ahorro: {ahorro} €/año')
-
-    print(f'Iversión inicial: {inversion_inicial} €')
-    print(f'VAN: {van} €')
-    print(f'TIR {tir * 100} %')
-    print()
-    print(cashflow)
+    
     pv.plot(cashflow['Cashflow acumulado'])
 
 if __name__ == '__main__':
