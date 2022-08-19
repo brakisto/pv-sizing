@@ -48,6 +48,7 @@ In the image you can see a representation of the final result obtained. Also in 
 
 </center>
 
-<center>
+<p align="center">
+  <img src="https://github.com/brakisto/PV-sizing/blob/main/src/imgs/pvprod.png" />
+</p>
 ![alt text](src/imgs/pvprod.png?raw=true)
-</center>
