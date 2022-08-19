@@ -49,5 +49,5 @@ In the image you can see a representation of the final result obtained. Also in 
 </center>
 
 <center>
-![alt text](src/imgs/pvprod.png?raw=true "(1) PV production and load; (2) Cashflow")
+![alt text](src/imgs/pvprod.png?raw=true)
 </center>
