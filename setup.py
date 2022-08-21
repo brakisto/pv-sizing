@@ -4,11 +4,11 @@ setup(
     long_description=open("README.md").read(),
     long_description_content_type='text/markdown',
     name='pv_sizing',
-    version='0.9',
+    version='0.9.2',
     license='MIT',
     author="Kiril Ivanov Kurtev",
     author_email='brakisto2015@gmail.com',
-    packages=['pv_sizing/dimension', 'pv_sizing/utils'],
+    packages=['pv_sizing/dimension', 'pv_sizing/utils', 'pv_sizing/web_scrapping'],
     package_dir={'': 'src'},
     url='https://github.com/brakisto/PV-sizing',
     keywords='photovoltaic sizing batteries financial analysis',
@@ -17,6 +17,7 @@ setup(
           'numpy-financial',
           'pandas',
           'pvlib'
+          'selenium'
       ],
     include_package_data=True,
     package_data={'pv_sizing/utils': ['example_data/*.csv']},

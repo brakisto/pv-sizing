@@ -48,7 +48,6 @@ In the image you can see a representation of the final result obtained. Also in 
 
 ![](https://github.com/brakisto/PV-sizing/raw/main/src/imgs/pvprod.png)
 
-
 ## Install
 
 PV-sizing depends on the following libraries:
@@ -64,7 +63,7 @@ To install the library you can simply use the pip command as follows:
 pip install pv-sizing
 ```
 
-## Example
+## Example photovoltaic production and battery sizing
 
 ```
 
@@ -105,3 +104,17 @@ cashflow, van, tir = pv.economic_analysis(initial_investment)
 pv.plot(cashflow['Cashflow acumulado'])
 
 ```
+
+## Example PVGIS scapping
+
+
+```
+from pv_sizing.web_scapping.irradiance import PVGIS
+import os
+
+pvgis = PVGIS(lat = 28.242, lon = -16.647, azimuth = 0, elevation = 30, absolute_path = os.getcwd())
+pvgis.interact_with_page()
+
+```
+
+*Some other files may be necessary for the correct functioning of this class. Currently it is necessary to use Chrome with ChromeDriver 103.0.5060.134. The location in the machine is no relevant since the webdriver_manager is used in the script.
