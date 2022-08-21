@@ -10,12 +10,12 @@ days_auto = 0.5
 num_panel = 5
 price_panel = 260
 price_inverter = 1300
-add_cost = 500
-coste_instalacion = 0.15
+additional_cost = 500
+installation_cost_perc = 0.15
 
 
-inversion_inicial = init_inv(num_panel=num_panel, price_panel=price_panel,
-                                costes_adicionales=add_cost, coste_instalacion=coste_instalacion,
+initial_investment = init_inv(num_panel=num_panel, price_panel=price_panel,
+                                additional_cost=additional_cost, installation_cost_perc=installation_cost_perc,
                                 price_inverter=price_inverter)
 
 pv = PVProduction(irr_data=example_irr, load=example_load, tnoct=42, gamma=-0.36, panel_power=450, num_panel=num_panel,
@@ -28,8 +28,8 @@ bat = BatterySizing(irr_data=example_irr, load=example_load, tnoct=42, gamma=-0.
 total_battery_capacity, n_bat_paraleirradiation, n_bat_series = bat.battery_sizing()
 daily_load_Wh = pv.mean_hourly_load_data().AE_kWh.sum() * 1000  # to a Wh
 
-coste_energia_actual, coste_energia_pv, compensacion_pv, ahorro = pv.savings_from_pv(sell_price=0.06,
+coste_energia_actual, coste_energia_pv, compensacion_pv, savings = pv.savings_from_pv(sell_price=0.06,
                                                                                         buy_price=0.32)
-cashflow, van, tir = pv.economic_analysis(inversion_inicial)
+cashflow, van, tir = pv.economic_analysis(initial_investment)
 
 pv.plot(cashflow['Cashflow acumulado'])

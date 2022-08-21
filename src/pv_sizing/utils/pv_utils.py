@@ -84,9 +84,9 @@ def index_tuple_to_datetime(df):
     df['time'] = pd.to_datetime(a, format='%m%d%H')
     return df
 
-def init_inv(num_panel, price_panel, costes_adicionales, coste_instalacion, price_inverter):
-    inversion_inicial = num_panel*price_panel + price_inverter + coste_instalacion + costes_adicionales
-    return inversion_inicial + inversion_inicial*coste_instalacion
+def init_inv(num_panel, price_panel, additional_cost, installation_cost_perc, price_inverter):
+    inversion_inicial = num_panel*price_panel + price_inverter + installation_cost + additional_cost
+    return inversion_inicial + inversion_inicial*installation_cost_perc
 
 def oneyear_todatetimeindex(df):
     if not isinstance(df, pd.DataFrame):

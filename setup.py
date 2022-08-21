@@ -4,7 +4,7 @@ setup(
     long_description=open("README.md").read(),
     long_description_content_type='text/markdown',
     name='pv_sizing',
-    version='0.7.2',
+    version='0.9',
     license='MIT',
     author="Kiril Ivanov Kurtev",
     author_email='brakisto2015@gmail.com',
