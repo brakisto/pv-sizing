@@ -105,11 +105,11 @@ pv.plot(cashflow['Cashflow acumulado'])
 
 ```
 
-## Example PVGIS scapping
+## Example PVGIS scrapping
 
 
 ```
-from pv_sizing.web_scapping.irradiance import PVGIS
+from pv_sizing.web_scrapping.irradiance import PVGIS
 import os
 
 pvgis = PVGIS(lat = 28.242, lon = -16.647, azimuth = 0, elevation = 30, absolute_path = os.getcwd())
