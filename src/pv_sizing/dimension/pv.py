@@ -5,9 +5,9 @@ import numpy as np
 import numpy_financial as npf
 from itertools import accumulate
 
-from utils.pv_utils import performance_ratio, european_efficiency_inverter, index_tuple_to_datetime, oneyear_todatetimeindex, \
+from pv_sizing.utils.pv_utils import performance_ratio, european_efficiency_inverter, index_tuple_to_datetime, oneyear_todatetimeindex, \
                             remove_leap_day, remove25hformat, from24to00, idae_pv_prod, cell_temp
-from utils.irradiance import get_irradiance
+from pv_sizing.utils.irradiance import get_irradiance
 
 import warnings
 from pandas.core.common import SettingWithCopyWarning

@@ -1,5 +1,5 @@
 from math import ceil
-from classes.pv import PVProduction
+from pv_sizing.dimension.pv import PVProduction
 
 class BatterySizing(PVProduction):
 

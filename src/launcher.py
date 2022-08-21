@@ -1,19 +1,19 @@
 import pandas as pd
-from classes.pv import PVProduction
-from classes.battery import BatterySizing
-from utils.constants import fresnel_fixed
-from utils.pv_utils import init_inv
+from pv_sizing.dimension.pv import PVProduction
+from pv_sizing.dimension.battery import BatterySizing
+from pv_sizing.utils.constants import fresnel_fixed
+from pv_sizing.utils.pv_utils import init_inv
 
 
 def main():
     # Leemos los datos de la carga del lugar de estudio y
     # los datos de irradiancia, temperatura, viento para la localidad escogida.
-    irradiation = pd.read_csv('data/example_irr.csv', header=6, skipfooter=12, engine='python', index_col='time')
+    irradiation = pd.read_csv('pv_sizing/example_data/example_irr.csv', header=6, skipfooter=12, engine='python', index_col='time')
     try:
-        load = pd.read_csv('data/load.csv', sep=';', decimal=',')
+        load = pd.read_csv('pv_sizing/example_data/example_load.csv', sep=';', decimal=',')
         print(load.Hora)
     except: 
-        load = pd.read_csv('data/load.csv', sep=',')
+        load = pd.read_csv('pv_sizing/example_data/example_load.csv', sep=',')
     print(load)
     days_auto = 0.5
     num_panel = 5
