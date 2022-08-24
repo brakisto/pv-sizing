@@ -1,5 +1,7 @@
 # PV-sizing
 
+Please read the instructions carefully for the correct operation of the library. It is in an early stage of development and needs some improvements. However, its correct use gives very good results. Any help for the improvement and maintenance of the library is welcome!
+
 ## Introduction
 
 Photovoltaic sizing
@@ -48,6 +50,71 @@ In the image you can see a representation of the final result obtained. Also in 
 
 ![](https://github.com/brakisto/PV-sizing/raw/main/src/imgs/pvprod.png)
 
+## Data structure
+
+Irradiance and load must be hourly and must contain a minimum of one full year of data. If the data contains more than one year, the library automatically averages the available data over the year.
+
+### Load data
+
+| time                | AE_kWh |
+|---------------------|--------|
+| 2020-07-01 01:00:00 | 0.206  |
+| 2020-07-01 02:00:00 | 0.204  |
+| 2020-07-01 03:00:00 | 0.197  |
+| 2020-07-01 04:00:00 | 0.205  |
+| 2020-07-01 05:00:00 | 0.196  |
+| 2020-07-01 06:00:00 | 0.198  |
+| 2020-07-01 07:00:00 | 0.196  |
+| 2020-07-01 08:00:00 | 0.418  |
+| 2020-07-01 09:00:00 | 0.187  |
+| 2020-07-01 10:00:00 | 0.189  |
+| 2020-07-01 11:00:00 | 0.19   |
+| 2020-07-01 12:00:00 | 0.203  |
+| 2020-07-01 13:00:00 | 0.19   |
+| 2020-07-01 14:00:00 | 0.193  |
+| 2020-07-01 15:00:00 | 0.191  |
+| 2020-07-01 16:00:00 | 0.235  |
+| 2020-07-01 17:00:00 | 0.197  |
+| 2020-07-01 18:00:00 | 0.194  |
+| 2020-07-01 19:00:00 | 0.189  |
+| 2020-07-01 20:00:00 | 0.189  |
+| 2020-07-01 21:00:00 | 0.207  |
+| 2020-07-01 22:00:00 | 0.292  |
+| 2020-07-01 23:00:00 | 0.298  |
+
+In this version it is necessary that the load column is named AE_kWh and its units are in kWh.
+
+### Irradiation data
+
+| time                | Gb(i)  | Gd(i)  | Gr(i) | H_sun | T2m   | WS10m | Int |
+|---------------------|--------|--------|-------|-------|-------|-------|-----|
+| 2005-01-01 00:09:00 | 0.0    | 0.0    | 0.0   | 0.0   | 7.97  | 1.66  | 0.0 |
+| 2005-01-01 01:09:00 | 0.0    | 0.0    | 0.0   | 0.0   | 6.42  | 1.79  | 0.0 |
+| 2005-01-01 02:09:00 | 0.0    | 0.0    | 0.0   | 0.0   | 6.37  | 1.93  | 0.0 |
+| 2005-01-01 03:09:00 | 0.0    | 0.0    | 0.0   | 0.0   | 6.35  | 2.0   | 0.0 |
+| 2005-01-01 04:09:00 | 0.0    | 0.0    | 0.0   | 0.0   | 6.31  | 2.0   | 0.0 |
+| 2005-01-01 05:09:00 | 0.0    | 0.0    | 0.0   | 0.0   | 6.12  | 1.86  | 0.0 |
+| 2005-01-01 06:09:00 | 0.0    | 0.0    | 0.0   | 0.0   | 5.79  | 1.72  | 0.0 |
+| 2005-01-01 07:09:00 | 0.0    | 0.0    | 0.0   | 0.0   | 5.75  | 1.93  | 0.0 |
+| 2005-01-01 08:09:00 | 0.0    | 0.0    | 0.0   | 0.0   | 5.57  | 1.86  | 0.0 |
+| 2005-01-01 09:09:00 | 181.33 | 57.09  | 1.71  | 12.55 | 6.39  | 1.86  | 0.0 |
+| 2005-01-01 10:09:00 | 400.78 | 113.83 | 4.3   | 22.66 | 8.11  | 2.07  | 0.0 |
+| 2005-01-01 11:09:00 | 611.53 | 135.72 | 6.6   | 30.96 | 9.2   | 2.28  | 0.0 |
+| 2005-01-01 12:09:00 | 660.96 | 192.72 | 7.89  | 36.57 | 9.85  | 2.28  | 0.0 |
+| 2005-01-01 13:09:00 | 710.3  | 211.02 | 8.59  | 38.61 | 10.18 | 2.14  | 0.0 |
+| 2005-01-01 14:09:00 | 650.11 | 235.03 | 8.25  | 36.65 | 10.25 | 2.07  | 0.0 |
+| 2005-01-01 15:09:00 | 670.37 | 184.76 | 7.57  | 31.1  | 10.12 | 2.07  | 0.0 |
+| 2005-01-01 16:09:00 | 485.18 | 184.65 | 5.6   | 22.85 | 9.75  | 2.14  | 0.0 |
+| 2005-01-01 17:09:00 | 0.0    | 72.22  | 1.09  | 12.76 | 9.08  | 2.21  | 0.0 |
+| 2005-01-01 18:09:00 | 0.0    | 24.97  | 0.38  | 1.48  | 7.98  | 2.21  | 0.0 |
+| 2005-01-01 19:09:00 | 0.0    | 0.0    | 0.0   | 0.0   | 7.19  | 2.41  | 0.0 |
+| 2005-01-01 20:09:00 | 0.0    | 0.0    | 0.0   | 0.0   | 6.67  | 2.62  | 0.0 |
+| 2005-01-01 21:09:00 | 0.0    | 0.0    | 0.0   | 0.0   | 6.29  | 2.76  | 0.0 |
+| 2005-01-01 22:09:00 | 0.0    | 0.0    | 0.0   | 0.0   | 6.03  | 2.97  | 0.0 |
+| 2005-01-01 23:09:00 | 0.0    | 0.0    | 0.0   | 0.0   | 5.82  | 3.17  | 0.0 |
+
+This CSV file can be obtained with the PVGIS class explained below.
+
 ## Install
 
 PV-sizing depends on the following libraries:
@@ -55,7 +122,11 @@ PV-sizing depends on the following libraries:
 - pandas
 - numpy
 - numpy-financial
+
+Optional libraries:
+
 - pvlib
+- selenium
 
 To install the library you can simply use the pip command as follows:
 
@@ -75,13 +146,14 @@ from pv_sizing.utils.load_example import example_irr, example_load
 from pv_sizing.utils.constants import fresnel_fixed
 from pv_sizing.utils.pv_utils import init_inv
 
+import pandas as pd
+
 days_auto = 0.5
 num_panel = 5
 price_panel = 260
 price_inverter = 1300
 additional_cost = 500
 installation_cost_perc = 0.15
-
 
 initial_investment = init_inv(num_panel=num_panel, price_panel=price_panel,
                                 additional_cost=additional_cost, installation_cost_perc=installation_cost_perc,
@@ -92,10 +164,10 @@ pv = PVProduction(irr_data=example_irr, load=example_load, tnoct=42, gamma=-0.36
 
 bat = BatterySizing(irr_data=example_irr, load=example_load, tnoct=42, gamma=-0.36, panel_power=450, num_panel=num_panel,
                     fresnel_eff=fresnel_fixed, amb_temp_multiplier=1.163, days_auto=days_auto, dod=0.95,
-                    amp_hour_rating=2400 / 48, nominal_voltage=48, batt_volt=48, inversor_eff=0.85)
+                    amp_hour_rating= 2400 / 48, nominal_voltage=48, batt_volt=48, inversor_eff=0.85)
 
-total_battery_capacity, n_bat_paraleirradiation, n_bat_series = bat.battery_sizing()
-daily_load_Wh = pv.mean_hourly_load_data().AE_kWh.sum() * 1000  # to a Wh
+total_battery_capacity, n_bat_paralell, n_bat_series = bat.battery_sizing()
+daily_load_Wh = pv.mean_hourly_load_data().AE_kWh.sum() * 1000  # to Wh
 
 coste_energia_actual, coste_energia_pv, compensacion_pv, savings = pv.savings_from_pv(sell_price=0.06,
                                                                                         buy_price=0.32)
@@ -106,7 +178,6 @@ pv.plot(cashflow['Cashflow acumulado'])
 ```
 
 ## Example PVGIS scrapping
-
 
 ```
 from pv_sizing.web_scrapping.irradiance import PVGIS

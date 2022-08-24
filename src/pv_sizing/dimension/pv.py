@@ -6,45 +6,13 @@ import numpy_financial as npf
 from itertools import accumulate
 
 from pv_sizing.utils.pv_utils import performance_ratio, european_efficiency_inverter, index_tuple_to_datetime, oneyear_todatetimeindex, \
-                            remove_leap_day, remove25hformat, from24to00, idae_pv_prod, cell_temp
+                                    idae_pv_prod, cell_temp
 from pv_sizing.utils.irradiance import get_irradiance
 
 import warnings
 from pandas.core.common import SettingWithCopyWarning
 
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
-
-def _correct_load_data(load):
-    """_summary_
-
-    Args:
-        load (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
-
-    # Corregimos los datos
-    load = remove25hformat(load)
-    load = from24to00(load)
-    load.set_index('time', inplace=True)
-    return load
-
-
-def _correct_irr_data(irr):
-    """_summary_
-
-    Args:
-        irr (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
-    # Pasamos los datos de fecha a format datetime.
-    irr.index = pd.to_datetime(irr.index, format='%Y%m%d:%H%M', errors='coerce')
-    # Quitamos 29 de Febrero si existe por comodidad
-    irr = remove_leap_day(irr)
-    return irr
 
 
 class PVProduction:
@@ -74,10 +42,17 @@ class PVProduction:
 
         if irr_data is None:
             self.irr_data = get_irradiance(lat, lon, start_date, end_date, tilt, surface_azimuth, freq)
-            raise ValueError('Se necesita API para datos de temperatura horaria')
+            raise ValueError('API is needed for hourly temperature')
 
-        self.load = _correct_load_data(load)
-        self.irr_data = _correct_irr_data(irr_data)
+        self.load = load
+        self.irr_data = irr_data
+
+        if not isinstance(self.load.index, pd.DatetimeIndex) or not isinstance(self.load.index, pd.DatetimeIndex):
+            try:
+                self.load.index = pd.to_datetime(self.load.index)
+                self.irr_data.index = pd.to_datetime(self.irr_data.index)
+            except:
+                raise TypeError('Index must be pd.DateTimeIndex')
         
         self.fresnel_eff = fresnel_eff
         self.tnoct = tnoct
@@ -95,7 +70,7 @@ class PVProduction:
         """
 
         return oneyear_todatetimeindex(
-            self.load.groupby([self.load.index.month, self.load.index.day, self.load.Hora]).mean())
+            self.load.groupby([self.load.index.month, self.load.index.day, self.load.index.hour]).mean())
 
     def mean_yearly_irr_data(self):
         """
@@ -124,7 +99,7 @@ class PVProduction:
         Returns: pd.DataFrame con la media horaria de la carga
 
         """
-        return self.load.groupby([self.load.Hora]).mean()
+        return self.load.groupby([self.load.index.hour]).mean()
 
     def mean_hourly_irr_data(self):
         """
