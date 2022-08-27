@@ -47,12 +47,18 @@ class PVProduction:
         self.load = load
         self.irr_data = irr_data
 
+        if len(self.load.columns) > 1:
+            raise ValueError(f'DataFrame found with {len(self.load.columns)}, only 1 is needed.')
+
+        if 'AE_kWh' not in self.load.columns.values:
+            self.load.rename(columns={self.load.columns.values[0]: 'AE_kWh'}, inplace = True)
+
         if not isinstance(self.load.index, pd.DatetimeIndex) or not isinstance(self.load.index, pd.DatetimeIndex):
             try:
                 self.load.index = pd.to_datetime(self.load.index)
                 self.irr_data.index = pd.to_datetime(self.irr_data.index)
             except:
-                raise TypeError('Index must be pd.DateTimeIndex')
+                raise TypeError('Index must be DateTimeIndex')
         
         self.fresnel_eff = fresnel_eff
         self.tnoct = tnoct
@@ -97,7 +103,6 @@ class PVProduction:
         Función para calcular la media horaria de la carga.
 
         Returns: pd.DataFrame con la media horaria de la carga
-
         """
         return self.load.groupby([self.load.index.hour]).mean()
 
@@ -119,15 +124,14 @@ class PVProduction:
 
     def pv_production(self):
         """
-        Función para añadir al Data Frame de irradiancia el Performance Ratio de la instalción y la producción de
+        Función para crear un Data Frame de irradiancia el Performance Ratio de la instalción y la producción de
         energía para cada time step.
 
+        Returns: pd.DataFrame con producción horaria
         """
 
         df_prod = pd.DataFrame(index = self.irr_data.index)
 
-        # CÁLCULO DE LA ENERGÍA PRODUCIDA
-        # IRRADIANCIA SUMA DIRECTA, DIFUSA Y REFLEJADA
         self.irr_data['Irr'] = self.irr_data['Gb(i)'] + self.irr_data['Gd(i)'] + self.irr_data['Gr(i)']
 
         df_prod = cell_temp(df_prod, self.irr_data, self.tnoct)
@@ -142,7 +146,6 @@ class PVProduction:
 
         Returns: tuple
             Tupla con Data Frames con la carga e irradiancia anual
-
         """
         myload = self.mean_yearly_load_data().set_index(
             pd.date_range('2019-01-01', '2020-01-01', freq='H', inclusive='left'))
@@ -158,7 +161,6 @@ class PVProduction:
 
         Returns: tuple
             Tupla con el balance energético, energía comprada y energía vertida.
-
         """
         df_prod = self.pv_production()
 
@@ -173,7 +175,6 @@ class PVProduction:
     def savings_from_pv(self, buy_price=0.32, sell_price=0.06):
 
         """
-
         Args:
             buy_price: float
                 Precio de compra de energía.
@@ -199,7 +200,6 @@ class PVProduction:
     def economic_analysis(self, init_inversion, ibi=None, oym_perc=0.02, proj_duration=25, ipc=0.04,
                           discount_rate=0.02):
         """
-
         Args:
             init_inversion: float
                 Inversión inicial para la instalación.
@@ -217,7 +217,6 @@ class PVProduction:
 
         Returns: tuple
             El primer valor corresponde a Data Frame con el cashflow, segundo valor corresponde a VAN y el último a TIR.
-
         """
 
         years = np.arange(1, proj_duration + 1)
@@ -227,39 +226,39 @@ class PVProduction:
         initial_inversion = np.zeros(len(years))
         initial_inversion[0] = init_inversion
 
-        duration_project_ahorro = np.array([ahorro * ((1 + ipc) ** (year - 1)) for year in years])
+        duration_project_savings = np.array([ahorro * ((1 + ipc) ** (year - 1)) for year in years])
         duration_project_oym = np.array([oym * ((1 + oym_perc) ** (year - 1)) for year in years])
 
-        cf = - initial_inversion - duration_project_oym + duration_project_ahorro
+        cf = - initial_inversion - duration_project_oym + duration_project_savings
         a_cf = np.array(list(accumulate(cf)))
 
         if ibi:
-            raise ValueError('No se ha añadido esta opción.')
+            raise ValueError('This option haven´t been added yet.')
 
         df_cf = pd.DataFrame(
-            {'Inversión inicial': initial_inversion, 'OyM': duration_project_oym, 'Ahorro': duration_project_ahorro, 'Cashflow': cf,
-             'Cashflow acumulado': a_cf})
+            {'Initial inversion': initial_inversion, 'Operation and maintanence': duration_project_oym, 'Savings': duration_project_savings, 'Cashflow': cf,
+             'Accumulated cashflow': a_cf})
 
         return df_cf, npf.npv(discount_rate, cf), npf.irr(cf)
-
+        
     def plot(self, cashflow):
         """
-
         Args:
             cashflow: pd.DataFrame
                 Data Frame con el cashflow acumulado del proyecto.
-
         """
 
         myload, myirr, myprod = self._yearly_load_and_irr_to_datetime_index()
 
         fig, ax = plt.subplots(2)
         cashflow.plot.bar(ax=ax[1])
-        myload.AE_kWh.plot(ax=ax[0])
-        myprod.kWh.plot(ax=ax[0])
+        myload.AE_kWh.to_frame().rename(columns={'AE_kWh':'Load'}).plot(ax=ax[0])
+        myprod.kWh.to_frame().rename(columns={'kWh':'Production'}).plot(ax=ax[0])
 
-        ax[0].set(title = "PV production and load", ylabel="Energy [kWh]", xlabel="Time [hours]")
+        ax[0].set(title = "Yearly photovoltaic production and load", ylabel="Energy [kWh]", xlabel="Time [hours]")
         ax[1].set(title = "Cashflow", xlabel="Time [years]", ylabel= "Money [€]")
+
+        ax[0].legend()
 
         plt.tight_layout()
         plt.show()

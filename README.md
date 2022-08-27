@@ -20,7 +20,7 @@ The calculations for the initial investment have been calculated with typical ma
 
 In the image you can see a representation of the final result obtained. Also in the table below the accumulated cashflow over the liftime of the project is shown.
 
-| Año | Inversión inicial | OyM        | Ahorro      | Cashflow     | Cashflow acumulado |
+| Year | Initial inversion | Operation and maintenence | Savings      | Cashflow     | Accumulated cashflow |
 |-----|-------------------|------------|-------------|--------------|--------------------|
 | 0   | 3565.1725         | 71.303450  | 527.383444  | -3109.092506 | -3109.092506       |
 | 1   | 0.0000            | 72.729519  | 548.478782  | 475.749263   | -2633.343243       |
@@ -56,7 +56,7 @@ Irradiance and load must be hourly and must contain a minimum of one full year o
 
 ### Load data
 
-| time                | AE_kWh |
+| time                | Load (kWh) |
 |---------------------|--------|
 | 2020-07-01 01:00:00 | 0.206  |
 | 2020-07-01 02:00:00 | 0.204  |
@@ -81,8 +81,6 @@ Irradiance and load must be hourly and must contain a minimum of one full year o
 | 2020-07-01 21:00:00 | 0.207  |
 | 2020-07-01 22:00:00 | 0.292  |
 | 2020-07-01 23:00:00 | 0.298  |
-
-In this version it is necessary that the load column is named AE_kWh and its units are in kWh.
 
 ### Irradiation data
 
