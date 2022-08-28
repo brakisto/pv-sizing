@@ -4,7 +4,7 @@ from pv_sizing.dimension.pv import PVProduction
 class BatterySizing(PVProduction):
 
     def __init__(self, load, irr_data, fresnel_eff, tnoct, gamma, panel_power, num_panel,
-                 inversor_eff, batt_volt, days_auto, dod, amp_hour_rating, nominal_voltage,
+                 inversor_eff, batt_volt, days_auto, dod, amp_hour_rating,
                  amb_temp_multiplier, **kwargs):
         """
         Args:
@@ -35,8 +35,6 @@ class BatterySizing(PVProduction):
                 dod de la batería obtenida de la hoja ténica.
             amp_hour_rating: float
                 Amp-hour rating obtenido de la hoja ténica.
-            nominal_voltage: int
-                Voltaje [V] nominal del sistema.
             batt_volt: int
                 Voltaje [V] de una batería.
         """
@@ -50,18 +48,32 @@ class BatterySizing(PVProduction):
         self.days_auto = days_auto
         self.dod = dod
         self.amp_hour_rating = amp_hour_rating
-        self.nominal_voltage = nominal_voltage
+        self.nominal_voltage = self.set_nominal_voltage()
         self.amb_temp_multiplier = amb_temp_multiplier
+
+    def daily_energy(self):
+        return self.mean_hourly_load_data().AE_kWh.sum()
 
     def daily_ah(self):
         """
-
         Returns: float
             Amperios-hora diarios [Ah]
 
         """
-        daily_energy = self.mean_hourly_load_data().AE_kWh.sum() * 1000  # Pasamos a Wh
-        return (daily_energy / self.inversor_eff) / self.batt_volt
+        return (self.daily_energy() * 1000 / self.inversor_eff) / self.batt_volt # to Ah wiht x1000
+
+    def set_nominal_voltage(self):
+
+        daily_energy = self.daily_energy()
+
+        if daily_energy <= 1:
+            nom_vol = 12
+        elif (daily_energy > 1) and (daily_energy <= 3.5):
+            nom_volt = 24
+        else:
+            nom_volt = 48
+        
+        return nom_volt
 
     def battery_sizing(self):
         """

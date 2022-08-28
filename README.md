@@ -125,6 +125,8 @@ Optional libraries:
 
 - pvlib
 - selenium
+- plotly
+- dash
 
 To install the library you can simply use the pip command as follows:
 
@@ -132,7 +134,7 @@ To install the library you can simply use the pip command as follows:
 pip install pv-sizing
 ```
 
-## Example photovoltaic production and battery sizing
+## Example photovoltaic production
 
 ```
 
@@ -146,25 +148,18 @@ from pv_sizing.utils.pv_utils import init_inv
 
 import pandas as pd
 
-days_auto = 0.5
 num_panel = 5
 price_panel = 260
 price_inverter = 1300
 additional_cost = 500
 installation_cost_perc = 0.15
 
-initial_investment = init_inv(num_panel=num_panel, price_panel=price_panel,
-                                additional_cost=additional_cost, installation_cost_perc=installation_cost_perc,
-                                price_inverter=price_inverter)
+initial_investment = init_inv(num_panel=num_panel, price_panel=price_panel, additional_cost=additional_cost,
+                            installation_cost_perc=installation_cost_perc, price_inverter=price_inverter)
 
-pv = PVProduction(irr_data=example_irr, load=example_load, tnoct=42, gamma=-0.36, panel_power=450, num_panel=num_panel,
-                    fresnel_eff=fresnel_fixed)
+pv = PVProduction(irr_data=example_irr, load=example_load, tnoct=42, gamma=-0.36, 
+                    panel_power=450, num_panel=num_panel, fresnel_eff=fresnel_fixed)
 
-bat = BatterySizing(irr_data=example_irr, load=example_load, tnoct=42, gamma=-0.36, panel_power=450, num_panel=num_panel,
-                    fresnel_eff=fresnel_fixed, amb_temp_multiplier=1.163, days_auto=days_auto, dod=0.95,
-                    amp_hour_rating= 2400 / 48, nominal_voltage=48, batt_volt=48, inversor_eff=0.85)
-
-total_battery_capacity, n_bat_paralell, n_bat_series = bat.battery_sizing()
 daily_load_Wh = pv.mean_hourly_load_data().AE_kWh.sum() * 1000  # to Wh
 
 coste_energia_actual, coste_energia_pv, compensacion_pv, savings = pv.savings_from_pv(sell_price=0.06,
@@ -173,6 +168,26 @@ cashflow, van, tir = pv.economic_analysis(initial_investment)
 
 pv.plot(cashflow['Cashflow acumulado'])
 
+```
+
+### Example battery sizing
+
+
+
+```
+from pv_sizing.dimension.battery import BatterySizing
+from pv_sizing.utils.load_example import example_irr, example_load
+
+days_auto = 0.5
+
+
+
+bat = BatterySizing(irr_data=example_irr, load=example_load, tnoct=42, gamma=-0.36, 
+                    panel_power=450, num_panel=num_panel,fresnel_eff=fresnel_fixed,
+                    amb_temp_multiplier=1.163, days_auto=days_auto, dod=0.95,
+                    amp_hour_rating= 2400 / 48, nominal_voltage=48, batt_volt=48, inversor_eff=0.85)
+
+total_battery_capacity, n_bat_paralell, n_bat_series = bat.battery_sizing()
 ```
 
 ## Example PVGIS scrapping
@@ -187,3 +202,28 @@ pvgis.interact_with_page()
 ```
 
 *Some other files may be necessary for the correct functioning of this class. Currently it is necessary to use Chrome with ChromeDriver 103.0.5060.134. The location in the machine is no relevant since the webdriver_manager is used in the script.
+
+## Example interactive plot
+
+```
+from pv_sizing.app_layout.dashboard import interactive_plot
+from pv_sizing.app_layout.applayout import app
+
+interactive_plot()
+
+if __name__ == "__main__":
+    app.run_server(debug=True)
+```
+
+When this code has been run, the following message will appear in the terminal:
+
+Dash is running on http://127.0.0.1:8050/
+
+ * Serving Flask app 'pv_sizing.app_layout.applayout'
+ * Debug mode: on
+
+Open http://127.0.0.1:8050/ on your terminal and try the interactive sizing mode.
+
+In this version, only the example data can be used for the interactive plot. In future versions it will be possible to drag the load and irradiance .CSV files directly into the browser. 
+
+![](https://github.com/brakisto/PV-sizing/raw/main/src/imgs/interactive_plot.png)

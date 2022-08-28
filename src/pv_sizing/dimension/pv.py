@@ -9,15 +9,20 @@ from pv_sizing.utils.pv_utils import performance_ratio, european_efficiency_inve
                                     idae_pv_prod, cell_temp
 from pv_sizing.utils.irradiance import get_irradiance
 
+from pv_sizing.utils.constants import fresnel_fixed
+
+
 import warnings
 from pandas.core.common import SettingWithCopyWarning
+
+
 
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 
 
 class PVProduction:
 
-    def __init__(self, load, irr_data, fresnel_eff, tnoct, gamma, panel_power, num_panel,
+    def __init__(self, load, irr_data,  tnoct, gamma, panel_power, num_panel, fresnel_eff = fresnel_fixed,
                  lat=None, lon=None, start_date=None, end_date=None, tilt=None,
                  surface_azimuth=None, freq='1H'):
         """
@@ -67,6 +72,7 @@ class PVProduction:
         self.num_panels = num_panel
 
         self.prod_data = self.pv_production()
+        self.myload_yearly, self.myirr_yearly, self.myprod_yearly = self._yearly_load_and_irr_to_datetime_index()
 
     def mean_yearly_load_data(self):
         """
@@ -262,3 +268,44 @@ class PVProduction:
 
         plt.tight_layout()
         plt.show()
+    
+    # @app.callback(
+    # [Output(component_id='PV', component_property='figure')],
+    # [Input(component_id='my-slider', component_property='value')]
+    # )
+    # def interactive_plot(self, num_panel):
+
+    #     pv = PVProduction(irr_data=example_irr, load=example_load, tnoct=42, gamma=-0.36, panel_power=450, num_panel=num_panel,
+    #                     fresnel_eff=fresnel_fixed)
+
+    #     days_auto = 0.5
+    #     num_panel = num_panel
+    #     price_panel = 260
+    #     price_inverter = 1300
+    #     additional_cost = 500
+    #     installation_cost_perc = 0.15
+
+    #     initial_investment = init_inv(num_panel=num_panel, price_panel=price_panel,
+    #                                     additional_cost=additional_cost, installation_cost_perc=installation_cost_perc,
+    #                                     price_inverter=price_inverter)
+
+    #     cashflow, van, tir = pv.economic_analysis(initial_investment)
+
+    #     fig = make_subplots(rows=2, cols=1)
+
+    #     fig.add_trace(
+    #         go.Scatter(x = pv.myload_yearly.index, y = pv.myload_yearly.AE_kWh),
+    #         row=1, col=1
+    #     )
+
+    #     fig.add_trace(go.Scatter(x = pv.myload_yearly.index, y = pv.myprod_yearly.kWh),
+    #         row=1, col=1
+    #     )
+
+    #     fig.add_trace(
+    #         go.Bar(x=cashflow.index.values, y=cashflow['Accumulated cashflow']),
+    #         row=2, col=1
+    #     )
+
+    #     return [fig]
+
