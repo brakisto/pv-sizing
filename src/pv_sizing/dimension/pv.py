@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import numpy_financial as npf
 from itertools import accumulate
+from collections import deque
 
 from pv_sizing.utils.pv_utils import performance_ratio, european_efficiency_inverter, index_tuple_to_datetime, oneyear_todatetimeindex, \
                                     idae_pv_prod, cell_temp
@@ -11,9 +12,9 @@ from pv_sizing.utils.irradiance import get_irradiance
 
 from pv_sizing.utils.constants import fresnel_fixed
 
-
 import warnings
 from pandas.core.common import SettingWithCopyWarning
+
 
 
 
@@ -47,7 +48,7 @@ class PVProduction:
 
         if irr_data is None:
             self.irr_data = get_irradiance(lat, lon, start_date, end_date, tilt, surface_azimuth, freq)
-            raise ValueError('API is needed for hourly temperature')
+            raise NotImplementedError('API is needed for hourly temperature')
 
         self.load = load
         self.irr_data = irr_data
@@ -173,8 +174,8 @@ class PVProduction:
         myload, myirr, myprod = self._yearly_load_and_irr_to_datetime_index()
         balance = myload.AE_kWh - myprod.kWh
 
-        comprada = balance.loc[balance > 0]
-        vertida = balance.loc[balance < 0]
+        comprada = balance.loc[balance > 0].rename('from_grid')
+        vertida = balance.loc[balance < 0].rename('into_grid')
 
         return balance, comprada, vertida
 
@@ -193,17 +194,43 @@ class PVProduction:
         """
 
         balance, comprada, vertida = self.energy_balance()
-        load = self.mean_yearly_load_data().AE_kWh
+        load = self.mean_yearly_load_data().AE_kWh.to_frame()
 
-        coste_energia_actual = buy_price * load.sum()
-        coste_energia_pv = buy_price * comprada.sum()
-        compensacion_pv = -sell_price * vertida.sum()
+        if not isinstance(buy_price, (int, float, str)):
+
+            if isinstance(buy_price, pd.DataFrame) and not isinstance(buy_price.index, pd.DatetimeIndex):
+                try:
+                    buy_price.index = pd.to_datetime(buy_price.index)
+                except:
+                    raise TypeError(f"Found type {type(buy_price.index)} but pd.DatetimeIndex was expected.")
+
+            if len(buy_price) != 24:
+                raise ValueError(f"{type(buy_price)} found with length {len(buy_price)} but 24 was expected.")
+
+            while buy_price.index[0].hour != self.load.index[0].hour: #Rotamos la lista hasta que la primera hora del precio coincida con la primera hora de la carga.
+                dq = deque(buy_price.index)
+                dq.rotate(1)
+                buy_price.index = dq
+
+            lst_buy_price = buy_price.loc[:, buy_price.columns[0]].tolist()  #Pasamos a lista los valores del precio
+            lst_buy_price *= len(load)//len(lst_buy_price) #Hacemos que la lista del precio coincida en longitud con el dataframe
+            load['buy_price'] = lst_buy_price #Creamos la columna en el dataframe con el precio horario.
+
+            total_df = pd.concat([load, comprada, vertida], axis=1).fillna(0) #Concatenamos la carga, energía comprada y vertida en un mismo DataFrame
+
+            coste_energia_actual = sum(total_df.buy_price * total_df.AE_kWh)
+            coste_energia_pv = sum(total_df.buy_price * total_df.from_grid)
+            compensacion_pv = -sum(total_df.buy_price * total_df.into_grid)
+        else:
+            coste_energia_actual = sum(buy_price * load.AE_kWh)
+            coste_energia_pv = sum(buy_price * comprada)
+            compensacion_pv = -sum(sell_price * vertida)
 
         ahorro = coste_energia_actual - coste_energia_pv + compensacion_pv
 
         return coste_energia_actual, coste_energia_pv, compensacion_pv, ahorro
 
-    def economic_analysis(self, init_inversion, ibi=None, oym_perc=0.02, proj_duration=25, ipc=0.04,
+    def economic_analysis(self, init_inversion, buy_price=0.32, sell_price=0.06,ibi=None, oym_perc=0.02, proj_duration=25, ipc=0.04,
                           discount_rate=0.02):
         """
         Args:
@@ -224,9 +251,8 @@ class PVProduction:
         Returns: tuple
             El primer valor corresponde a Data Frame con el cashflow, segundo valor corresponde a VAN y el último a TIR.
         """
-
         years = np.arange(1, proj_duration + 1)
-        ahorro = self.savings_from_pv()[-1]
+        ahorro = self.savings_from_pv(buy_price=buy_price, sell_price=sell_price)[-1]
         oym = init_inversion * oym_perc
 
         initial_inversion = np.zeros(len(years))
@@ -268,44 +294,3 @@ class PVProduction:
 
         plt.tight_layout()
         plt.show()
-    
-    # @app.callback(
-    # [Output(component_id='PV', component_property='figure')],
-    # [Input(component_id='my-slider', component_property='value')]
-    # )
-    # def interactive_plot(self, num_panel):
-
-    #     pv = PVProduction(irr_data=example_irr, load=example_load, tnoct=42, gamma=-0.36, panel_power=450, num_panel=num_panel,
-    #                     fresnel_eff=fresnel_fixed)
-
-    #     days_auto = 0.5
-    #     num_panel = num_panel
-    #     price_panel = 260
-    #     price_inverter = 1300
-    #     additional_cost = 500
-    #     installation_cost_perc = 0.15
-
-    #     initial_investment = init_inv(num_panel=num_panel, price_panel=price_panel,
-    #                                     additional_cost=additional_cost, installation_cost_perc=installation_cost_perc,
-    #                                     price_inverter=price_inverter)
-
-    #     cashflow, van, tir = pv.economic_analysis(initial_investment)
-
-    #     fig = make_subplots(rows=2, cols=1)
-
-    #     fig.add_trace(
-    #         go.Scatter(x = pv.myload_yearly.index, y = pv.myload_yearly.AE_kWh),
-    #         row=1, col=1
-    #     )
-
-    #     fig.add_trace(go.Scatter(x = pv.myload_yearly.index, y = pv.myprod_yearly.kWh),
-    #         row=1, col=1
-    #     )
-
-    #     fig.add_trace(
-    #         go.Bar(x=cashflow.index.values, y=cashflow['Accumulated cashflow']),
-    #         row=2, col=1
-    #     )
-
-    #     return [fig]
-

@@ -57,8 +57,7 @@ def interactive_plot(num_panel = 2, panel_price = 260, inverter_price = 1300, ad
     yanchor="bottom",
     y=1.02,
     xanchor="right",
-    x=1
-    ))
+    x=1))
 
     fig.update_layout(
     paper_bgcolor="#f8f9fa"

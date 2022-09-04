@@ -1,6 +1,6 @@
 # PV-sizing
 
-Please read the instructions carefully for the correct operation of the library. It is in an early stage of development and needs some improvements. However, its correct use gives very good results. Any help for the improvement and maintenance of the library is welcome!
+**Please read the instructions carefully for the correct operation of the library. It is in an early stage of development and needs some improvements. However, its correct use gives very good results. Any help for the improvement and maintenance of the library is welcome!**
 
 ## Introduction
 
@@ -52,7 +52,7 @@ In the image you can see a representation of the final result obtained. Also in 
 
 ## Data structure
 
-Irradiance and load must be hourly and must contain a minimum of one full year of data. If the data contains more than one year, the library automatically averages the available data over the year.
+Irradiance and load must be hourly and must contain a minimum of **one full year of data**. If the data contains more than one year, the library automatically averages the available data over the year.
 
 ### Load data
 
@@ -111,7 +111,46 @@ Irradiance and load must be hourly and must contain a minimum of one full year o
 | 2005-01-01 22:09:00 | 0.0    | 0.0    | 0.0   | 0.0   | 6.03  | 2.97  | 0.0 |
 | 2005-01-01 23:09:00 | 0.0    | 0.0    | 0.0   | 0.0   | 5.82  | 3.17  | 0.0 |
 
+Gb(i): Beam (direct) irradiance on the inclined plane (plane of the array) (W/m2)
+Gd(i): Diffuse irradiance on the inclined plane (plane of the array) (W/m2)
+Gr(i): Reflected irradiance on the inclined plane (plane of the array) (W/m2)
+H_sun: Sun height (degree)
+T2m: 2-m air temperature (degree Celsius)
+WS10m: 10-m total wind speed (m/s)
+Int: 1 means solar radiation values are reconstructed
+
 This CSV file can be obtained with the PVGIS class explained below.
+
+### Electricity price
+
+For electricity price data you can provide a fixed price, or a format as shown in the table below. **It needs to be a DataFrame with the index of type DatetimeIndex in order to automatically match the first hour of the load DataFrame and the electricity price DataFrame.  Only the prices for 24 hours must be provided.**
+
+| Hour                | €/kWh   |
+|---------------------|---------|
+| 2022-04-09 00:00:00 | 0.33419 |
+| 2022-04-09 01:00:00 | 0.33143 |
+| 2022-04-09 02:00:00 | 0.33193 |
+| 2022-04-09 03:00:00 | 0.34965 |
+| 2022-04-09 04:00:00 | 0.35213 |
+| 2022-04-09 05:00:00 | 0.34960 |
+| 2022-04-09 06:00:00 | 0.36944 |
+| 2022-04-09 07:00:00 | 0.37212 |
+| 2022-04-09 08:00:00 | 0.36155 |
+| 2022-04-09 09:00:00 | 0.29125 |
+| 2022-04-09 10:00:00 | 0.17853 |
+| 2022-04-09 11:00:00 | 0.14803 |
+| 2022-04-09 12:00:00 | 0.13411 |
+| 2022-04-09 13:00:00 | 0.13434 |
+| 2022-04-09 14:00:00 | 0.11547 |
+| 2022-04-09 15:00:00 | 0.07960 |
+| 2022-04-09 16:00:00 | 0.06471 |
+| 2022-04-09 17:00:00 | 0.05458 |
+| 2022-04-09 18:00:00 | 0.13163 |
+| 2022-04-09 19:00:00 | 0.19826 |
+| 2022-04-09 20:00:00 | 0.29412 |
+| 2022-04-09 21:00:00 | 0.34978 |
+| 2022-04-09 22:00:00 | 0.35915 |
+| 2022-04-09 23:00:00 | 0.35213 |
 
 ## Install
 
@@ -137,42 +176,38 @@ pip install pv-sizing
 ## Example photovoltaic production
 
 ```
-
 from pv_sizing.dimension.pv import PVProduction
-from pv_sizing.dimension.battery import BatterySizing
 
 from pv_sizing.utils.load_example import example_irr, example_load
 
 from pv_sizing.utils.constants import fresnel_fixed
 from pv_sizing.utils.pv_utils import init_inv
 
+from pv_sizing.web_scrapping.electricity_price import ElectricityPrice
+
 import pandas as pd
 
-num_panel = 5
-price_panel = 260
-price_inverter = 1300
-additional_cost = 500
-installation_cost_perc = 0.15
 
-initial_investment = init_inv(num_panel=num_panel, price_panel=price_panel, additional_cost=additional_cost,
-                            installation_cost_perc=installation_cost_perc, price_inverter=price_inverter)
+pv_costs = {"num_panel": 5,
+            "price_panel": 260,
+            "price_inverter" : 1300,
+            "additional_cost" : 500,
+            "installation_cost_perc" : 0.15}
+
+initial_investment = init_inv(**pv_costs)
+
+electricity_price = ElectricityPrice().extract_data()
 
 pv = PVProduction(irr_data=example_irr, load=example_load, tnoct=42, gamma=-0.36, 
                     panel_power=450, num_panel=num_panel, fresnel_eff=fresnel_fixed)
 
-daily_load_Wh = pv.mean_hourly_load_data().AE_kWh.sum() * 1000  # to Wh
+cashflow, van, tir = pv.economic_analysis(initial_investment, sell_price=0.06, buy_price=electricity_price)
 
-coste_energia_actual, coste_energia_pv, compensacion_pv, savings = pv.savings_from_pv(sell_price=0.06,
-                                                                                        buy_price=0.32)
-cashflow, van, tir = pv.economic_analysis(initial_investment)
-
-pv.plot(cashflow['Cashflow acumulado'])
+pv.plot(cashflow['Accumulated cashflow'])
 
 ```
 
 ### Example battery sizing
-
-
 
 ```
 from pv_sizing.dimension.battery import BatterySizing
@@ -180,12 +215,10 @@ from pv_sizing.utils.load_example import example_irr, example_load
 
 days_auto = 0.5
 
-
-
 bat = BatterySizing(irr_data=example_irr, load=example_load, tnoct=42, gamma=-0.36, 
                     panel_power=450, num_panel=num_panel,fresnel_eff=fresnel_fixed,
                     amb_temp_multiplier=1.163, days_auto=days_auto, dod=0.95,
-                    amp_hour_rating= 2400 / 48, nominal_voltage=48, batt_volt=48, inversor_eff=0.85)
+                    amp_hour_rating= 2400 / 48, batt_volt=48, inversor_eff=0.85)
 
 total_battery_capacity, n_bat_paralell, n_bat_series = bat.battery_sizing()
 ```
@@ -199,6 +232,19 @@ import os
 pvgis = PVGIS(lat = 28.242, lon = -16.647, azimuth = 0, elevation = 30, absolute_path = os.getcwd())
 pvgis.interact_with_page()
 
+```
+
+*Some other files may be necessary for the correct functioning of this class. Currently it is necessary to use Chrome with ChromeDriver 103.0.5060.134. The location in the machine is no relevant since the webdriver_manager is used in the script.
+
+
+## Example of electricity price scrapping
+
+This class allows the extraction of hourly energy prices. The prices have been obtained from the Spanish Electricity Grid (REE) for the day of execution of the script.
+
+```
+from pv_sizing.web_scrapping.electricity_price import ElectricityPrice
+
+electricity_price = ElectricityPrice().extract_data()
 ```
 
 *Some other files may be necessary for the correct functioning of this class. Currently it is necessary to use Chrome with ChromeDriver 103.0.5060.134. The location in the machine is no relevant since the webdriver_manager is used in the script.
