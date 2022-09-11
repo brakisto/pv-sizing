@@ -1,3 +1,6 @@
+
+[![Downloads](https://static.pepy.tech/personalized-badge/pv-sizing?period=total&units=international_system&left_color=black&right_color=blue&left_text=Downloads)](https://pepy.tech/project/pv-sizing)
+
 # PV-sizing
 
 **Please read the instructions carefully for the correct operation of the library. It is in an early stage of development and needs some improvements. However, its correct use gives very good results. Any help for the improvement and maintenance of the library is welcome!**

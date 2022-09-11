@@ -84,6 +84,22 @@ app.layout = html.Div([
     html.H1("Photovoltaic production", style={'text-align': 'center'}),
 
     html.Div([
+    dcc.Upload(
+            id="upload-data",
+            children=html.Div(["Drag and Drop or ", html.A("Select Files")]),
+            style={
+                "width": "100%",
+                "height": "60px",
+                "lineHeight": "60px",
+                "borderWidth": "1px",
+                "borderStyle": "dashed",
+                "borderRadius": "5px",
+                "textAlign": "center",
+                "margin": "10px",
+            },
+            # Allow multiple files to be uploaded
+            multiple=True,
+        ),
     dcc.Graph(id='PV', figure={})
     ]),
     html.Br(), 
